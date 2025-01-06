@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      h1 {
+        text-align: center;
+      }
+      label {
+        font-weight: bold;
+      }
+      input, select, textarea {
+        width: 100%;
+        padding: 8px;
+        margin: 5px 0;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+      }
+      button {
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Admin Panel</h1>
+      <form id="adminForm">
+        <label for="uniqueID">Enter Unique ID:</label>
+        <input type="text" id="uniqueID" name="uniqueID" placeholder="Enter Unique ID" required />
+
+        <label for="status">Status:</label>
+        <select id="status" name="status">
+          <option value="Open">Open</option>
+          <option value="Closed">Closed</option>
+        </select>
+
+        <label for="actionDetails">Action Details:</label>
+        <textarea id="actionDetails" name="actionDetails" placeholder="Enter action details"></textarea>
+
+        <label for="responsibilities">Responsibilities:</label>
+        <textarea id="responsibilities" name="responsibilities" placeholder="Enter responsibilities"></textarea>
+
+        <label for="targetDate">Target Date:</label>
+        <input type="date" id="targetDate" name="targetDate" />
+
+        <label for="actionStatus">Action Status:</label>
+        <select id="actionStatus" name="actionStatus">
+          <option value="Pending">Pending</option>
+          <option value="Completed">Completed</option>
+        </select>
+
+        <button type="submit">Update Record</button>
+      </form>
+
+      <div id="message" style="margin-top: 20px; text-align: center; font-size: 16px; color: red;"></div>
+    </div>
+
+    <script>
+      document.getElementById("adminForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        
+        const uniqueID = document.getElementById("uniqueID").value.trim();
+        const status = document.getElementById("status").value;
+        const actionDetails = document.getElementById("actionDetails").value.trim();
+        const responsibilities = document.getElementById("responsibilities").value.trim();
+        const targetDate = document.getElementById("targetDate").value;
+        const actionStatus = document.getElementById("actionStatus").value;
+
+        // Validation for Unique ID
+        if (!uniqueID) {
+          document.getElementById("message").innerText = "Unique ID is required.";
+          return;
+        }
+
+        // Prepare admin data object
+        const adminData = {
+          uniqueID: uniqueID,
+          status: status,
+          actionDetails: actionDetails,
+          responsibilities: responsibilities,
+          targetDate: targetDate,
+          actionStatus: actionStatus,
+        };
+
+        // Send data to server-side function and handle success or failure
+        google.script.run
+          .withSuccessHandler(function (response) {
+            document.getElementById("message").innerText = "Record updated successfully!";
+            document.getElementById("adminForm").reset();
+          })
+          .withFailureHandler(function (error) {
+            document.getElementById("message").innerText = `Error: ${error.message}`;
+          })
+          .submitAdminPanel(adminData);
+      });
+    </script>
+  </body>
+</html>

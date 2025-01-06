@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safety Interaction Form</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #eff5bb;
+      font-family: Arial, sans-serif;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    #interaction-form {
+      background: rgba(248, 227, 227, 0.722);
+      padding: 15px;
+      border-radius: 10px;
+      border: 2px solid rgba(0, 0, 0, 0.5);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    h3 {
+      text-align: center;
+      color: hsl(120, 9%, 4%);
+      font-size: 30px;
+      margin-top: -2px;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .form-group {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      flex-wrap: nowrap;
+    }
+
+    .form-group label {
+      width: 150px;
+      font-size: 13px;
+      color: #555;
+      font-weight: bold;
+      flex-shrink: 0;
+      text-align: left;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+      flex-grow: 1;
+      padding: 5px;
+      font-size: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-right: 10px;
+      width: calc(50% - 160px);
+    }
+
+    textarea {
+      height: 50px;
+      resize: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #5157f6;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    button:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 768px) {
+      #interaction-form {
+        margin: 10px;
+        padding: 15px;
+      }
+
+      .form-group label {
+        font-size: 14px;
+      }
+
+      .form-group input, .form-group select, .form-group textarea {
+        font-size: 13px;
+      }
+
+      button {
+        font-size: 14px;
+      }
+    }
+  </style>
+
+<script>
+    // Observation Sub Category data based on Observation Category
+    const observationSubCategories = {
+      Procedures: ["Not Followed", "Available", "Adequate", "Known", "Understood", "Followed", "Other"],
+      PPE: ["Head", "Eyes and Face", "Ears", "Respiratory System", "Arms and Hands", "Legs and Feet", "Body", "Other"],
+      HouseKeeping: ["Known", "Other"],
+      PositionsOfPeople: ["Falling", "Contacting Temperature Extremes", "Striking Against or Being Struck by Objects", "Caught In, On, or Between Objects", "Contacting Electric Current", "Inhaling, Absorbing, or Swallowing a Hazardous Substance", "Repetitive Motions", "Awkward Positions/Static Postures", "Other"],
+      ToolsAndEquipment: ["Local Made", "Right for the Job", "Used Correctly", "In Safe Condition", "Other"],
+      ReactionsOfPeople: ["Adjusting PPE", "Changing Position", "Rearranging Job", "Stopping Job", "Attaching Grounds", "Performing Lockouts", "Other"],
+    };
+
+    // Update Observation Sub Category dropdown
+    function updateSubCategories() {
+      const category = document.getElementById("observationCategory").value;
+      const subCategoryDropdown = document.getElementById("observationSubCategory");
+      subCategoryDropdown.innerHTML = "";
+
+      if (category && observationSubCategories[category]) {
+        observationSubCategories[category].forEach((subCategory) => {
+          const option = document.createElement("option");
+          option.value = subCategory;
+          option.textContent = subCategory;
+          subCategoryDropdown.appendChild(option);
+        });
+      }
+    }
+
+    // Function to validate the form before submission
+    function validateForm() {
+      const form = document.getElementById("interaction-form");
+      const requiredFields = form.querySelectorAll("[required]");
+      let isValid = true;
+
+      // Check if all required fields are filled
+      requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+          isValid = false;
+          field.style.borderColor = "red"; // Highlight invalid fields
+        } else {
+          field.style.borderColor = "#ccc"; // Reset border color if valid
+        }
+      });
+
+      if (!isValid) {
+        alert("Please fill in all the required fields.");
+      }
+
+      return isValid;
+    }
+
+    // Function to handle form submission
+    function submitForm() {
+      // Validate the form before submitting
+      if (validateForm()) {
+        const submitButton = document.getElementById("submitButton");
+        const formData = Object.fromEntries(new FormData(document.getElementById("interaction-form")).entries());
+
+        // Change button text to "Submitting..."
+        submitButton.textContent = "Submitting...";
+
+        // Call the Google Apps Script function to handle data submission
+        google.script.run.submitUserForm(formData);
+
+        // Show success alert
+        alert("Form submitted successfully!");
+
+        // Reset the form and update observation subcategory options
+        document.getElementById("interaction-form").reset();
+        document.getElementById("observationSubCategory").innerHTML = ""; // Clear Sub Categories
+
+        // Reset the submit button text back to "Submit"
+        submitButton.textContent = "Submit";
+      }
+    }
+</script>
+
+</head>
+<body>
+  <form id="interaction-form">
+    <h3>Safety Interaction Form</h3>
+
+    <div class="form-group">
+      <label>Observer Name:</label>
+      <input type="text" id="observerName" name="observerName" required maxlength="30" pattern="[A-Za-z0-9 .,\\-]*" title="Only letters, numbers, spaces, dots, commas, and dashes are allowed.">
+
+      <label>Observer Employee ID:</label>
+      <input type="text" id="observerEmployeeID" name="observerEmployeeID" required maxlength="6" pattern="[A-Za-z0-9]*" title="Only letters and numbers are allowed. Maximum length is 6 characters.">
+    </div>
+
+    <div class="form-group">
+      <label>Observer Email:</label>
+      <input type="email" name="observerEmail" required>
+
+      <label>ZIC:</label>
+      <select name="zic" required>
+        <option value="Process">Process</option>
+        <option value="Power And Utilities">Power And Utilities</option>
+        <option value="RMHS">RMHS</option>
+        <option value="Product Handling">Product Handling</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Start Time:</label>
+      <input type="time" name="startTime" required>
+
+      <label>End Time:</label>
+      <input type="time" name="endTime" required>
+    </div>
+
+    <div class="form-group">
+      <label>Location:</label>
+      <select name="location" required>
+        <!-- All location options go here -->
+        <option value="Process 100">Process 100</option>
+        <option value="Process 200">Process 200</option>
+        <option value="Process 300">Process 300</option>
+        <option value="Process 400">Process 400</option>
+        <option value="Process 500">Process 500</option>
+        <option value="Process 600">Process 600</option>
+        <option value="Process 700">Process 700</option>
+        <option value="Process 800">Process 800</option>
+        <option value="Briquette Plant">Briquette Plant</option>
+        <option value="Plant Office">Plant Office</option>
+        <option value="Workshops">Workshops</option>
+        <option value="Laboratory">Laboratory</option>
+        <option value="Quality">Quality</option>
+        <option value="Parking Area">Parking Area</option>
+        <option value="Power Plant">Power Plant</option>
+        <option value="CO2 Compressor Area">CO2 Compressor Area</option>
+        <option value="RO and DM">RO and DM</option>
+        <option value="Power Distribution Stations">Power Distribution
+Stations</option>
+        <option value="Steam">Steam</option>
+        <option value="Boiler">Boiler</option>
+        <option value="Seawater Facilities">Seawater Facilities</option>
+        <option value="Air Compressor Area">Air Compressor Area</option>
+        <option value="Lime Stone">Lime Stone</option>
+        <option value="Salt Lignite">Salt Lignite</option>
+        <option value="Coal">Coal</option>
+        <option value="Raw Material Handling">Raw Material Handling</option>
+        <option value="Contractor Sheds">Contractor Sheds</option>
+        <option value="Finished Product Handling">Finished Product
+Handling</option>
+        <option value="Finished Product Bagging">Finished Product
+Bagging</option>
+        <option value="Finished Product Warehouse">Finished Product
+Warehouse</option>
+        <option value="Training Building">Training Building</option>
+        <option value="HR Building">HR Building</option>
+        <option value="General Stores">General Stores</option>
+        <option value="Medical">Medical</option>
+        <option value="Fire and Safety">Fire and Safety</option>
+        <option value="Commercial Building">Commercial Building</option>
+        <option value="Security and Admin">Security and Admin</option>
+        <option value="Canteen">Canteen</option>
+        <!-- Add other options as needed -->
+      </select>
+
+      <label>Observation Category:</label>
+      <select id="observationCategory" name="observationCategory" onchange="updateSubCategories()" required>
+        <!-- Category options go here -->
+        <option value="Procedures">Procedures</option>
+        <option value="PPE">PPE</option>
+        <option value="ReactionsOfPeople">Reactions of People</option>
+        <option value="PositionsOfPeople">Positions of People</option>
+        <option value="ToolsAndEquipment">Tools and Equipment</option>
+        <option value="HouseKeeping">House Keeping</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Observation Sub Category:</label>
+      <select id="observationSubCategory" name="observationSubCategory" required>
+        <!-- Subcategories populated dynamically -->
+      </select>
+
+      <label>Risk Potential:</label>
+      <select name="riskPotential" required>
+        <option value="Fatality">Fatality</option>
+        <option value="Major Injury">Major Injury</option>
+        <option value="Minor Injury">Minor Injury</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Number of Observers:</label>
+      <input type="number" name="numObservers" min="1" required>
+
+      <label>Situation:</label>
+      <select name="situation" required>
+        <option value="Unsafe Act">Unsafe Act</option>
+        <option value="Unsafe Condition">Unsafe Condition</option>
+        <option value="Safe">Safe</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Observation Description:</label>
+      <textarea name="description" required></textarea>
+    </div>
+
+    <button id="submitButton" type="button" onclick="submitForm()">Submit</button>
+  </form>
+</body>
+</html>
